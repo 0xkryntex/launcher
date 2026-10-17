@@ -33,11 +33,14 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         _servers.value = api.servers(settings.value.apiUrl)
     }
 
-    fun login(user: String, pass: String, register: Boolean) = launchSafe {
-        val base = settings.value.apiUrl
+    fun login(user: String, pass: String, register: Boolean, apiUrl: String) = launchSafe {
+        val base = apiUrl.trim().trimEnd('/')
+        prefs.saveSettings(settings.value.copy(apiUrl = base))
         val r = if (register) api.register(base, user, pass) else api.login(base, user, pass)
         prefs.saveToken(r.token)
-        if (settings.value.nickname.isBlank()) prefs.saveSettings(settings.value.copy(nickname = user))
+        if (settings.value.nickname.isBlank()) {
+            prefs.saveSettings(settings.value.copy(apiUrl = base, nickname = user))
+        }
     }
 
     fun logout() = viewModelScope.launch { prefs.saveToken(null) }

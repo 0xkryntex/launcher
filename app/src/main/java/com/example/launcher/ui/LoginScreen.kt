@@ -18,6 +18,8 @@ fun LoginScreen(vm: AppViewModel) {
     var pass by remember { mutableStateOf("") }
     var register by remember { mutableStateOf(false) }
     val loading by vm.loading.collectAsStateWithLifecycle()
+    val saved by vm.settings.collectAsStateWithLifecycle()
+    var api by remember(saved.apiUrl) { mutableStateOf(saved.apiUrl) }
 
     Column(
         Modifier.fillMaxSize().padding(24.dp),
@@ -26,6 +28,9 @@ fun LoginScreen(vm: AppViewModel) {
     ) {
         Text(if (register) "Criar conta" else "Entrar", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(24.dp))
+        OutlinedTextField(api, { api = it }, label = { Text("URL da API") }, singleLine = true,
+            modifier = Modifier.fillMaxWidth())
+        Spacer(Modifier.height(12.dp))
         OutlinedTextField(user, { user = it }, label = { Text("Usuário") }, singleLine = true,
             modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(12.dp))
@@ -35,8 +40,8 @@ fun LoginScreen(vm: AppViewModel) {
             modifier = Modifier.fillMaxWidth())
         Spacer(Modifier.height(20.dp))
         Button(
-            onClick = { vm.login(user.trim(), pass, register) },
-            enabled = !loading && user.isNotBlank() && pass.length >= 6,
+            onClick = { vm.login(user.trim(), pass, register, api) },
+            enabled = !loading && api.isNotBlank() && user.isNotBlank() && pass.length >= 6,
             modifier = Modifier.fillMaxWidth(),
         ) { Text(if (loading) "Aguarde..." else if (register) "Registrar" else "Entrar") }
         TextButton(onClick = { register = !register }) {
